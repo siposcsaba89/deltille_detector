@@ -28,6 +28,9 @@
 #define INCLUDE_CHECKERBOARD_DETECTOR_DETECTORPARAMS_H_
 
 #include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 
 namespace orp {
 namespace calibration {

@@ -127,7 +127,7 @@ void writeBoardDefinitionsHH(const char *filename,
       fprintf(out, "%d\n", corners.size().area());
       for (int r = 0; r < corners.rows; ++r)
         for (int c = 0; c < corners.cols; ++c) {
-          const cv::Vec3d pt = corners.at<const cv::Vec3d>(r, c);
+          const cv::Vec3d pt = corners.at<cv::Vec3d>(r, c);
           fprintf(out, "%f %f %f\n", pt[0], pt[1], pt[2]);
         }
     }

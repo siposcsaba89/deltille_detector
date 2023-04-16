@@ -21,6 +21,7 @@
 #include <iostream>
 #include <limits>
 #include <vector>
+#include <filesystem>
 
 #include <deltille/target_detector.h>
 
@@ -141,6 +142,47 @@ private:
   vector<string> _filenames;
 };
 
+
+/**
+ */
+class CaptureDataSource : public DataSource {
+public:
+    CaptureDataSource(const std::string& filename)
+        : _fname(filename)
+    {
+        _cap.open(filename);
+        if (!_cap.isOpened())
+        {
+            throw std::runtime_error("Failed to open video capture!");
+        }
+    }
+
+private:
+    bool get_image(cv::Mat& I, int f_i) override {
+        if (f_i < 0)
+            f_i = _counter++;
+
+        if (_cap.read(_img_bgr))
+        {
+            cv::cvtColor(_img_bgr, I, cv::COLOR_BGR2GRAY);
+            std::filesystem::path p(_fname);
+            _last_file_name = p.filename().string() + "_" + std::to_string(f_i) + ".jpg";
+
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+    }
+
+private:
+    int _counter{ 0 };
+    cv::VideoCapture _cap;
+    cv::Mat _img_bgr;
+    std::string _fname;
+};
+
 void RunDetector(DataSource *data_source, string target_dsc_fn,
                  const fs::path &output_dir, bool debug) {
   TargetDetector target_detector(target_dsc_fn);
@@ -189,7 +231,7 @@ void RunDetector(DataSource *data_source, string target_dsc_fn,
 
       if (debug) {
         cv::imshow("detection", debug_image);
-        int k = cv::waitKey(100);
+        int k = cv::waitKey(0);
         if (k == ' ') // pause on space
           k = cv::waitKey(0);
         if (k == 'q' || k == 27) // quite on 'q' or ESC
@@ -234,9 +276,9 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  if (!fs::exists(target_dsc_fn) || !fs::is_regular_file(target_dsc_fn)) {
-    throw invalid_argument("invalid target *.dsc file '" + target_dsc_fn + "'");
-  }
+//  if (!fs::exists(target_dsc_fn) || !fs::is_regular_file(target_dsc_fn)) {
+//    throw invalid_argument("invalid target *.dsc file '" + target_dsc_fn + "'");
+//  }
 
   if (vm.count("output")) {
     output_dir = fs::path(vm["output"].as<string>());
@@ -253,8 +295,16 @@ int main(int argc, char **argv) {
   }
 
   if (!files.empty()) {
-    ImageListDataSource data_source(move(files));
-    RunDetector(&data_source, target_dsc_fn, output_dir, vm.count("debug"));
+      std::unique_ptr<DataSource> data_source;
+      if (files.size() == 1)
+      {
+          data_source = std::make_unique<CaptureDataSource>(files[0]);
+      }
+      else
+      {
+          data_source = std::make_unique<ImageListDataSource>(move(files));
+      }
+    RunDetector(data_source.get(), target_dsc_fn, output_dir, vm.count("debug"));
   }
 
   return 0;

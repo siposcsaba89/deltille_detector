@@ -14,7 +14,7 @@
 ## License along with this library; if not, write to the Free Software
 ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-find_package(OpenCV 3 CONFIG REQUIRED COMPONENTS core highgui imgproc imgcodecs) 
+find_package(OpenCV CONFIG REQUIRED COMPONENTS core highgui imgproc imgcodecs) 
 add_library(opencv INTERFACE IMPORTED)
 set_target_properties(opencv PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${OpenCV_INCLUDE_DIRS}"
@@ -24,6 +24,11 @@ add_library(deltille
   DetectorTools.cpp
   TagFamily.cpp
   TaggedBoardIndexer.cpp)
+
+set_target_properties(deltille PROPERTIES 
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON
+)
 
 target_include_directories(deltille PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>

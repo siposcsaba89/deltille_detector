@@ -91,9 +91,6 @@ FindBoards(const cv::Mat &I, const cv::Size &board_size,
   case cv::DataType<uint16_t>::type:
     return FindBoardsHelper<SaddlePointType, FloatImageType, uint16_t>(
         I, board_size, boards);
-  case cv::DataType<uint32_t>::type:
-    return FindBoardsHelper<SaddlePointType, FloatImageType, uint32_t>(
-        I, board_size, boards);
   case cv::DataType<float>::type:
     return FindBoardsHelper<SaddlePointType, FloatImageType, float>(
         I, board_size, boards);
@@ -111,8 +108,8 @@ class TargetDetector {
 public:
   /**
    */
-  TargetDetector(const std::string &target_dsc_fn, int board_width = 22,
-                 int board_height = 22)
+  TargetDetector(const std::string &target_dsc_fn, int board_width = 17,
+                 int board_height = 11)
       : _indexer() {
     if (!target_dsc_fn.empty()) {
       _indexer.addBoardDefinitions(target_dsc_fn);
@@ -121,10 +118,10 @@ public:
       _indexer.chessboard_row = board_height;
     }
 
-    if (_indexer.board_defs.empty()) {
-      throw std::invalid_argument("invalid target *.dsc file '" + target_dsc_fn +
-                             "'" + " no boards were found");
-    }
+//    if (_indexer.board_defs.empty()) {
+//      throw std::invalid_argument("invalid target *.dsc file '" + target_dsc_fn +
+//                             "'" + " no boards were found");
+//    }
   }
 
   /**
