@@ -126,7 +126,8 @@ public:
 
   /**
    */
-  void run(const cv::Mat &src, CornerVector &corners,
+  void run(const cv::Mat& src,
+      std::vector<orp::calibration::BoardObservation>& boards,
            cv::Mat *debug_image = nullptr) {
     using namespace orp::calibration;
 
@@ -137,7 +138,6 @@ public:
 
     const cv::Size board_size(_indexer.chessboard_col, _indexer.chessboard_row);
 
-    std::vector<orp::calibration::BoardObservation> boards;
     if (is_triangular()) {
       FindBoards<MonkeySaddlePointSpherical>(src, board_size, boards);
       _indexer.fixTriangleBoards(src, boards);
@@ -146,14 +146,14 @@ public:
       _indexer.fixCheckerBoards(src, boards);
     }
 
-    corners.clear();
-    corners.reserve(boards.size() * board_size.area());
-    for (auto &b : boards) {
-      for (size_t i = 0; i < b.corner_locations.size(); ++i) {
-        const auto &c = b.corner_locations[i];
-        corners.emplace_back(c.x, c.y, b.board_id, int(i), b.indexed);
-      }
-    }
+//    corners.clear();
+//    corners.reserve(boards.size() * board_size.area());
+//    for (auto &b : boards) {
+//      for (size_t i = 0; i < b.corner_locations.size(); ++i) {
+//        const auto &c = b.corner_locations[i];
+//        corners.emplace_back(c.x, c.y, b.board_id, int(i), b.indexed);
+//      }
+//    }
 
     if (debug_image) {
       auto thickness = std::max(

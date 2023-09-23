@@ -211,8 +211,19 @@ void RunDetector(DataSource *data_source, string target_dsc_fn,
   cv::Mat I, debug_image;
   for (int i = 0; data_source->getImage(I, i); ++i) {
     if (!I.empty()) {
+      std::vector<orp::calibration::BoardObservation> boards;
+      target_detector.run(I, boards, debug ? &debug_image : nullptr);
       vector<CalibrationCorner> corners;
-      target_detector.run(I, corners, debug ? &debug_image : nullptr);
+      corners.clear();
+      corners.reserve(boards.size() * 200);
+      for (auto& b : boards)
+      {
+        for (size_t i = 0; i < b.corner_locations.size(); ++i)
+        {
+            const auto& c = b.corner_locations[i];
+            corners.emplace_back(c.x, c.y, b.board_id, int(i), b.indexed);
+        }
+      }
 
       if (do_write_corners) {
         auto filename = data_source->getLastFilename();
